@@ -6,6 +6,7 @@ const cheerio = require('cheerio');
 const _ = require('lodash');
 const opn = require('opn');
 const async = require('async');
+const player = require('play-sound')({});
 
 const REQUEST_INTERVAL = 100;
 const SUPREME = 'http://www.supremenewyork.com';
@@ -16,25 +17,31 @@ let map = {};
 let count = 0;
 
 console.log('**************STARTED***************');
+alert();
 
 poll();
 
 function poll() {
-  const startDate = Date.now();
+  // const startDate = Date.now();
   async.auto({
     request: cb => request(SUPREME_ALL, (err, response, body) => cb(err, body)),
     process: ['request', (results, cb) => process(results.request, cb)]
   }, (err, results) => {
-    if(err) { console.log(err); }
+    if(err) { console.log(count, err); }
     const newShit = results.process;
-    console.log('' + count + ': ' + (Date.now() - startDate) + ' ms');
+    // console.log('' + count + ': ' + (Date.now() - startDate) + ' ms');
     if(count++ > 0 && !_.isEmpty(newShit)) {
       console.log('New Shit\'s Dropped');
       console.log(newShit);
+      alert();
       open(newShit);
     }
     return setTimeout(poll, REQUEST_INTERVAL);
   });
+}
+
+function alert() {
+  player.play('./alert.mp3', (err) => {if(err) {console.log('Error playing sound', err);}});
 }
 
 function open(styles) {
